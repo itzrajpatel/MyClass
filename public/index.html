@@ -113,35 +113,49 @@
                                     <div class="d-flex align-items-center">
                                         <i class="fa-solid fa-chalkboard me-3"></i>
                                         <span>Class:</span>
-                                        <input class="form-control class-name-input ms-3" value="${classDetails.className}" disabled style="background-color: transparent; border: none; font-size: 40px"/>
+                                        <input class="form-control class-name-input ms-3" value="${classDetails.className}" disabled style="background-color: transparent; border: none; font-size: 40px;"/>
                                     </div>
                                 </h1>
                                 <p class="card-text">
                                     <div class="d-flex align-items-center">
                                         <i class="fa-solid fa-book me-2"></i>
                                         <span>Subject:</span>
-                                        <input class="form-control subject-input ms-3" value="${classDetails.subject}" disabled style="background-color: transparent; border: none"/>
+                                        <input class="form-control subject-input ms-3" value="${classDetails.subject}" disabled style="background-color: transparent; border: none;"/>
                                     </div>
                                 </p>
                                 <p class="card-text">
                                     <div class="d-flex align-items-center">
                                         <i class="fa-solid fa-user me-2"></i>
                                         <span>Faculty:</span>
-                                        <input class="form-control faculty-input ms-3" value="${classDetails.faculty}" disabled style="background-color: transparent; border: none"/>
+                                        <input class="form-control faculty-input ms-3" value="${classDetails.faculty}" disabled style="background-color: transparent; border: none;"/>
                                     </div>
                                 </p>
                                 <p class="card-text">
                                     <div class="d-flex align-items-center">
                                         <i class="fa-solid fa-door-open me-2"></i>
                                         <span>Room:</span>
-                                        <input class="form-control room-input ms-3" value="${classDetails.room} ${isLab(classDetails.room) ? '(Lab)' : ''}" disabled style="background-color: transparent; border: none"/>
+                                        <input class="form-control room-input ms-3" value="${classDetails.room} ${isLab(classDetails.room) ? '(Lab)' : ''}" disabled style="background-color: transparent; border: none;"/>
                                     </div>
                                 </p>
                                 <p class="card-text">
                                     <div class="d-flex align-items-center">
                                         <i class="fa fa-calendar me-2"></i>
                                         <span>Date:</span>
-                                        <input type="date" class="form-control date-input ms-3" value="${classDetails.dateTime}" disabled style="background-color: transparent; border: none"/>
+                                        <input type="date" class="form-control date-input ms-3" value="${classDetails.dateTime}" disabled style="background-color: transparent; border: none;"/>
+                                    </div>
+                                </p>
+                                <p class="card-text">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-clock me-2"></i>
+                                        <span>From:</span>
+                                        <input type="time" class="form-control time-input ms-3" value="${classDetails.fromTime}" disabled style="background-color: transparent; border: none;"/>
+                                    </div>
+                                </p>
+                                <p class="card-text">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-clock me-2"></i>
+                                        <span>To:</span>
+                                        <input type="time" class="form-control time-input ms-3" value="${classDetails.toTime}" disabled style="background-color: transparent; border: none;"/>
                                     </div>
                                 </p>
                                 <div class="card-body">
@@ -195,11 +209,49 @@
             //         const className = card.querySelector('.class-name-input').value;
             //         const subject = card.querySelector('.subject-input').value;
             //         const faculty = card.querySelector('.faculty-input').value;
-            //         const room = card.querySelector('.room-input').value;
+            //         const room = card.querySelector('.room-input').value.split(" ")[0]; // Remove '(Lab)' if present
             //         const dateTime = card.querySelector('.date-input').value;
+            //         const fromTime = card.querySelectorAll('.time-input')[0].value; // First input is "From" Time
+            //         const toTime = card.querySelectorAll('.time-input')[1].value;   // Second input is "To" Time
 
-            //         // Update the class details in localStorage
-            //         upcomingClasses[index] = { className, subject, faculty, room, dateTime };
+            //         // Validation: Ensure required fields are filled
+            //         if (!className || !subject || !faculty || !room || !dateTime || !fromTime || !toTime) {
+            //             alert("Please enter all class details!");
+            //             return;
+            //         }
+                    
+            //         if (!fromTime || !toTime) {
+            //             alert("Please enter valid start and end times.");
+            //             return;
+            //         }
+
+            //         const fromDate = new Date(`${dateTime}T${fromTime}`);
+            //         const toDate = new Date(`${dateTime}T${toTime}`);
+
+            //         if (fromDate >= toDate) {
+            //             alert("The start time must be earlier than the end time.");
+            //             return;
+            //         }
+
+            //         // Check for conflicting room and date with overlapping times
+            //         const isRoomTaken = upcomingClasses.some((classDetails, i) => {
+            //             if (i !== parseInt(index) && classDetails.room === room && classDetails.dateTime === dateTime) {
+            //                 const existingFromDate = new Date(`${classDetails.dateTime}T${classDetails.fromTime}`);
+            //                 const existingToDate = new Date(`${classDetails.dateTime}T${classDetails.toTime}`);
+
+            //                 // Check if the times overlap
+            //                 return fromDate < existingToDate && toDate > existingFromDate;
+            //             }
+            //             return false;
+            //         });
+
+            //         if (isRoomTaken) {
+            //             alert('The room is already booked for this date and time.');
+            //             return;
+            //         }
+
+            //         // If no conflict, save the class details
+            //         upcomingClasses[index] = { className, subject, faculty, room, dateTime, fromTime, toTime };
             //         localStorage.setItem('upcomingClasses', JSON.stringify(upcomingClasses));
 
             //         // Disable inputs and toggle button visibility
@@ -214,41 +266,66 @@
 
             document.querySelectorAll('.save-btn').forEach(button => {
                 button.addEventListener('click', function () {
-                    const index = this.getAttribute('data-index'); // Get the index of the class being edited
+                    const index = this.getAttribute('data-index');
                     const card = this.closest('.card');
-                    const inputs = card.querySelectorAll('input');
-                    const className = card.querySelector('.class-name-input').value.trim();
-                    const subject = card.querySelector('.subject-input').value.trim();
-                    const faculty = card.querySelector('.faculty-input').value.trim();
-                    const room = card.querySelector('.room-input').value.trim();
-                    const dateTime = card.querySelector('.date-input').value.trim();
+                    const className = card.querySelector('.class-name-input').value;
+                    const subject = card.querySelector('.subject-input').value;
+                    const faculty = card.querySelector('.faculty-input').value;
+                    const room = card.querySelector('.room-input').value.split(" ")[0]; // Remove '(Lab)' if present
+                    const dateTime = card.querySelector('.date-input').value;
+                    const fromTime = card.querySelectorAll('.time-input')[0].value; // First input is "From" Time
+                    const toTime = card.querySelectorAll('.time-input')[1].value;   // Second input is "To" Time
 
-                    // Ensure all fields are filled
-                    if (!className || !subject || !faculty || !room || !dateTime) {
-                        alert("Please fill in all fields before saving.");
+                    // Validation: Ensure required fields are filled
+                    if (!className || !subject || !faculty || !room || !dateTime || !fromTime || !toTime) {
+                        alert("Please enter all class details!");
                         return;
                     }
 
-                    // Validate if the room is already booked for the same date and time
-                    const isRoomConflict = upcomingClasses.some((classDetail, classIndex) => {
-                        return (
-                            classIndex.toString() !== index && // Exclude the current class being edited
-                            classDetail.room === room && // Check if room is the same
-                            classDetail.dateTime === dateTime // Check if date and time are the same
-                        );
+                    // Time validation: Ensure start time is earlier than end time
+                    const fromDate = new Date(`${dateTime}T${fromTime}`);
+                    const toDate = new Date(`${dateTime}T${toTime}`);
+                    if (fromDate >= toDate) {
+                        alert("The start time must be earlier than the end time.");
+                        return;
+                    }
+
+                    // Check for conflicting room and date with overlapping times
+                    const isRoomTaken = upcomingClasses.some((classDetails, i) => {
+                        if (i !== parseInt(index) && classDetails.room === room && classDetails.dateTime === dateTime) {
+                            const existingFromDate = new Date(`${classDetails.dateTime}T${classDetails.fromTime}`);
+                            const existingToDate = new Date(`${classDetails.dateTime}T${classDetails.toTime}`);
+                            return fromDate < existingToDate && toDate > existingFromDate;
+                        }
+                        return false;
                     });
 
-                    if (isRoomConflict) {
-                        alert(`Error: Room ${room} is already booked for the selected date and time.`);
+                    if (isRoomTaken) {
+                        alert('The room is already booked for this date and time.');
                         return;
                     }
 
-                    // Update the class details in the `upcomingClasses` array
-                    upcomingClasses[index] = { className, subject, faculty, room, dateTime };
+                    // Check if the faculty is already assigned to another class at the same time and date
+                    const isFacultyAssigned = upcomingClasses.some((classDetails, i) => {
+                        if (i !== parseInt(index) && classDetails.faculty === faculty && classDetails.dateTime === dateTime) {
+                            const existingFromDate = new Date(`${classDetails.dateTime}T${classDetails.fromTime}`);
+                            const existingToDate = new Date(`${classDetails.dateTime}T${classDetails.toTime}`);
+                            return fromDate < existingToDate && toDate > existingFromDate;
+                        }
+                        return false;
+                    });
+
+                    if (isFacultyAssigned) {
+                        alert('The faculty is already assigned to another class at this time.');
+                        return;
+                    }
+
+                    // If no conflict, save the class details
+                    upcomingClasses[index] = { className, subject, faculty, room, dateTime, fromTime, toTime };
                     localStorage.setItem('upcomingClasses', JSON.stringify(upcomingClasses));
 
                     // Disable inputs and toggle button visibility
-                    inputs.forEach(input => input.disabled = true);
+                    card.querySelectorAll('input').forEach(input => input.disabled = true);
                     this.style.display = 'none';
                     card.querySelector('.edit-btn').style.display = 'block';
 
@@ -283,15 +360,15 @@
         };
 
         // Function to check if the selected room is available on the selected date
-function isRoomAvailable(room, dateTime, index) {
-    const upcomingClasses = JSON.parse(localStorage.getItem("upcomingClasses")) || [];
-    
-    // Exclude the current class (so it doesn't block itself when being edited)
-    const filteredClasses = upcomingClasses.filter((classDetails, classIndex) => classIndex !== index);
+        function isRoomAvailable(room, dateTime, index) {
+            const upcomingClasses = JSON.parse(localStorage.getItem("upcomingClasses")) || [];
+            
+            // Exclude the current class (so it doesn't block itself when being edited)
+            const filteredClasses = upcomingClasses.filter((classDetails, classIndex) => classIndex !== index);
 
-    // Check if the room is already booked on the selected date
-    return !filteredClasses.some(classDetails => classDetails.room === room && classDetails.dateTime === dateTime);
-}
+            // Check if the room is already booked on the selected date
+            return !filteredClasses.some(classDetails => classDetails.room === room && classDetails.dateTime === dateTime);
+        }
 
         // Logout function
         function logout() {
@@ -305,7 +382,7 @@ function isRoomAvailable(room, dateTime, index) {
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
             <img src="logo.png" height="45px" width="45px" style="margin: 0 20px;">
-            <a class="navbar-brand" href="index.html" style="font-size: 30px; font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;">Class Organiser</a>
+            <a class="navbar-brand" href="index.html" style="font-size: 30px; font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;">Class Organizer</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

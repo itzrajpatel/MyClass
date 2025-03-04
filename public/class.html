@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Class</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="logo.png">
+    
     <!-- FontAwesome CDN -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     
@@ -133,6 +135,9 @@
             const loginLink = document.getElementById("loginLink");
             loginLink.textContent = "Logout";
             loginLink.href = "javascript:logout()";
+
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("date").setAttribute("min", today);
     
             // Display saved classes
             displayUpcomingClasses();
@@ -145,6 +150,59 @@
         }
     
         // Save class details
+        // function saveClassDetails(event) {
+        //     event.preventDefault();
+
+        //     // Get form values
+        //     const className = document.getElementById("class").value;
+        //     const subject = document.getElementById("subject").value;
+        //     const faculty = document.getElementById("faculty").value;
+        //     const room = document.getElementById("room").value;
+        //     const dateTime = document.getElementById("date").value;
+        //     const fromTime = document.getElementById("fromTime").value; // Get "From Time"
+        //     const toTime = document.getElementById("toTime").value; // Get "To Time"
+
+        //     if(className == "" || subject == "" || faculty == "" || room == "" || dateTime == "" || fromTime == "" || toTime == "") {
+        //         alert("Please enter class details!")
+        //     }
+        //     else {
+        //         // Get existing upcoming classes from localStorage
+        //         const upcomingClasses = JSON.parse(localStorage.getItem("upcomingClasses")) || [];
+
+        //         // Check if the selected room is already in use at the same time and date
+        //         const roomInUse = upcomingClasses.some(classDetails => 
+        //             classDetails.room === room && classDetails.dateTime === dateTime && 
+        //             ((fromTime >= classDetails.fromTime && fromTime < classDetails.toTime) ||
+        //             (toTime > classDetails.fromTime && toTime <= classDetails.toTime))
+        //         );
+
+        //         if (roomInUse) {
+        //             alert("This room is already booked for the selected date and time range!");
+        //             return; // Exit the function if there's a conflict
+        //         }
+
+        //         // Create class object
+        //         const classDetails = { className, subject, faculty, room, dateTime, fromTime, toTime };
+
+        //         // Add the new class details to upcoming classes
+        //         upcomingClasses.push(classDetails);
+        //         localStorage.setItem("upcomingClasses", JSON.stringify(upcomingClasses));
+
+        //         // Clear form and reset dropdown
+        //         document.getElementById("tripForm").reset();
+        //         document.getElementById("room").value = "";
+
+        //         // Update room dropdown
+        //         populateRoomDropdown();
+
+        //         // Update display of upcoming classes
+        //         displayUpcomingClasses();
+
+        //         alert("Class saved successfully!");
+        //     }
+        // }
+
+        // Save class details
         function saveClassDetails(event) {
             event.preventDefault();
 
@@ -154,19 +212,48 @@
             const faculty = document.getElementById("faculty").value;
             const room = document.getElementById("room").value;
             const dateTime = document.getElementById("date").value;
+            const fromTime = document.getElementById("fromTime").value; // Get "From Time"
+            const toTime = document.getElementById("toTime").value; // Get "To Time"
+
+            if(className === "" || subject === "" || faculty === "" || room === "" || dateTime === "" || fromTime === "" || toTime === "") {
+                alert("Please enter all class details!");
+                return;
+            }
+
+            if (fromTime >= toTime) {
+                alert("The start time must be earlier than the end time.");
+                return;
+            }
 
             // Get existing upcoming classes from localStorage
             const upcomingClasses = JSON.parse(localStorage.getItem("upcomingClasses")) || [];
 
-            // Check if the selected room is already in use
-            const roomInUse = upcomingClasses.some(classDetails => classDetails.room === room);
+            // Check if the selected room is already in use at the same time and date
+            const roomInUse = upcomingClasses.some(classDetails => 
+                classDetails.room === room && classDetails.dateTime === dateTime && 
+                ((fromTime >= classDetails.fromTime && fromTime < classDetails.toTime) ||
+                (toTime > classDetails.fromTime && toTime <= classDetails.toTime))
+            );
+
             if (roomInUse) {
-                alert("Room no. already in use!");
-                return; // Exit the function
+                alert("This room is already booked for the selected date and time range!");
+                return;
+            }
+
+            // Check if the faculty is already assigned at the same date and time range
+            const facultyInUse = upcomingClasses.some(classDetails => 
+                classDetails.faculty === faculty && classDetails.dateTime === dateTime && 
+                ((fromTime >= classDetails.fromTime && fromTime < classDetails.toTime) ||
+                (toTime > classDetails.fromTime && toTime <= classDetails.toTime))
+            );
+
+            if (facultyInUse) {
+                alert("This faculty is already assigned to another class at the same date and time range!");
+                return;
             }
 
             // Create class object
-            const classDetails = { className, subject, faculty, room, dateTime };
+            const classDetails = { className, subject, faculty, room, dateTime, fromTime, toTime };
 
             // Add the new class details to upcoming classes
             upcomingClasses.push(classDetails);
@@ -195,7 +282,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Class Organiser</a>
+            <a class="navbar-brand" href="#">Class Organizer</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -211,29 +298,37 @@
 
     <!-- Class Organiser Form -->
     <div class="container my-5">
-        <h2 class="text-center mb-4">Organise Your Class</h2>
+        <h2 class="text-center mb-4">Organize Your Class</h2>
         <form id="tripForm" class="p-4 rounded shadow">
             <div class="mb-3">
-                <label for="source" class="form-label">Class</label>
+                <label for="source" class="form-label" style="color: teal; font-weight: bold;">Class</label>
                 <input type="text" id="class" class="form-control" placeholder="Enter Class Name" required>
             </div>
             <div class="mb-3">
-                <label for="destination" class="form-label">Subject</label>
+                <label for="destination" class="form-label" style="color: teal; font-weight: bold;">Subject</label>
                 <input type="text" id="subject" class="form-control" placeholder="Enter Subject Name" required>
             </div>
             <div class="mb-3">
-                <label for="departureDate" class="form-label">Faculty</label>
+                <label for="departureDate" class="form-label" style="color: teal; font-weight: bold;">Faculty</label>
                 <input type="text" id="faculty" class="form-control" placeholder="Enter Faculty Name" required>
             </div>
             <div class="mb-3">
-                <label for="room" class="form-label">Room No.</label>
+                <label for="room" class="form-label" style="color: teal; font-weight: bold;">Room No.</label>
                 <select id="room" class="form-select" required>
                     <!-- Options will be dynamically generated -->
                 </select>
             </div>
             <div id="peopleDetails" class="mb-3">
-                <label class="form-label">Date</label>
+                <label class="form-label" style="color: teal; font-weight: bold;">Date</label>
                 <input type="date" id="date" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" style="color: teal; font-weight: bold;">Time (From)</label>
+                <input type="time" id="fromTime" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" style="color: teal; font-weight: bold;">Time (To)</label>
+                <input type="time" id="toTime" class="form-control" required>
             </div>
             <div class="d-flex justify-content-end mt-4">
                 <button type="button" class="btn btn-primary" id="saveTrip" onclick="saveClassDetails(event)">Save</button>
